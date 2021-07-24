@@ -4,6 +4,7 @@
 #include "entity.h"
 #include "../shaders/shader.h"
 #include "../projection.h"
+#include "../audio.h"
 #include <iostream>
 #include <string>
 #include <glad/glad.h>
@@ -15,42 +16,44 @@
 class Ball : public Entity
 {
   using Entity::Entity;
+  bool isColliding = false;
+  Audio audio;
 
 public:
-  void handle_logic(float deltaTime, Player player, Enemy enemy, float xDir, float yDir, float prevPositionX, float prevPositionY)
+  void set_audio(Audio &_audio)
   {
-
-    if (check_collision(*this, player))
-    {
-      if (prevPositionX - position.x > 0)
-      {
-        xDir = -1 * deltaTime;
-      }
-      else
-      {
-        std::cout << "pos: " << prevPositionX - position.x << "\r\n";
-        xDir = deltaTime;
-      }
-    }
-    else if (check_collision(*this, enemy))
-    {
-      if (prevPositionX - position.x > 0)
-      {
-        xDir = deltaTime;
-      }
-      else
-      {
-        xDir = -1 * deltaTime;
-      }
-    }
-
+    audio = _audio;
+  };
+  void handle_logic(float deltaTime, Player player, Enemy enemy, float &xDir, float &yDir, float &prevPositionX, float &prevPositionY)
+  {
     if (std::round(position.y) > WINDOW_HEIGHT - scale.y / 4 && std::round(position.y) < WINDOW_HEIGHT)
     {
       yDir = -1 * deltaTime;
+      play_random_sfx();
     }
     else if (std::round(position.y) < scale.y / 4 && std::round(position.y) > 0)
     {
       yDir = 1 * deltaTime;
+      play_random_sfx();
+    }
+
+    if (check_collision(*this, player))
+    {
+      if (prevPositionX - normPos.x < 0)
+      {
+        xDir = deltaTime;
+        yDir += std::rand() % 2 - 1;
+        play_random_sfx();
+      }
+    }
+    else if (check_collision(*this, enemy))
+    {
+      if (prevPositionX - normPos.x > 0)
+      {
+        xDir = -1 * deltaTime;
+        yDir += std::rand() % 2 - 1;
+        play_random_sfx();
+      }
     }
 
     position.x = position.x + xDir;
@@ -66,9 +69,14 @@ public:
     draw();
     unbind();
     shader.set_uniform_matrix4_value("model", 1, model);
-    prevPositionX = position.x;
-    prevPositionY = position.y;
   };
+
+private:
+  void play_random_sfx()
+  {
+    int sfxNum = std::round(std::rand() % 8 + 1);
+    audio.playSfx("audio/" + std::to_string(sfxNum) + ".mp3");
+  }
 };
 
 #endif

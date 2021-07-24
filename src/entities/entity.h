@@ -8,7 +8,6 @@
 
 class Entity
 {
-  std::string name;
   unsigned int vbo, vao, ebo;
   float vertices[6][4] = {{0.0f, 0.4f, 0.0f, 1.0f},
                           {0.2f, 0.0f, 1.0f, 0.0f},
@@ -18,6 +17,7 @@ class Entity
                           {0.2f, 0.0f, 1.0f, 0.0f}};
 
 public:
+  std::string name;
   glm::mat4 model = glm::mat4(1.0f);
   glm::mat4 projection;
   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 0.0f);
@@ -91,7 +91,16 @@ public:
 bool check_collision(Entity &one, Entity &two)
 {
   bool isCollidingX = one.position.x + one.scale.x / 4 >= two.position.x && two.position.x + two.scale.x / 4 >= one.position.x;
-  bool isCollidingY = one.position.y + one.scale.y / 2 >= two.position.y && two.position.y + two.scale.y / 2 >= one.position.y;
+  bool isCollidingY = one.position.y + one.scale.y / 3 >= two.position.y && two.position.y + two.scale.y / 3 >= one.position.y;
+  // TODO y doesn't seem to work properly (caused by the entity scale?)
+  if (two.name == "enemy" && isCollidingX && false)
+  {
+    std::cout << two.name << isCollidingY << "\r\n";
+    std::cout << "ballY: " << one.position.y << "\r\n";
+    std::cout << "ballS: " << one.position.y + one.scale.y / 3 << "\r\n";
+    std::cout << "enemyY: " << two.position.y << "\r\n";
+    std::cout << "enemyS: " << two.position.y + two.scale.y / 3 << "\r\n";
+  }
   return isCollidingX && isCollidingY;
 }
 

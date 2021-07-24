@@ -7,6 +7,7 @@
 #include "entities/player.h"
 #include "entities/enemy.h"
 #include "entities/ball.h"
+#include "audio.h"
 #include <GLFW/glfw3.h>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <fstream>
@@ -37,6 +38,7 @@ float prevPositionY = 0.0f;
 Player player;
 Enemy enemy;
 Ball ball;
+Audio audio;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -138,6 +140,9 @@ int main()
   {
     return -1;
   }
+
+  audio = Audio();
+
   Shader defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
   Shader enemyShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
   Shader ballShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
@@ -148,6 +153,7 @@ int main()
   player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 4), inputPos);
   enemy = Enemy("enemy", enemyShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 4), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5));
   ball = Ball("ball", ballShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5));
+  ball.set_audio(audio);
 
   initText();
 
@@ -188,9 +194,11 @@ int main()
     float currentFrame = glfwGetTime();
     deltaTime = (currentFrame - lastFrame) * 60 * 4;
     lastFrame = currentFrame;
+    prevPositionX = glm::normalize(glm::vec3(ball.position.x, ball.position.y, 0.0f)).x;
+    prevPositionY = glm::normalize(glm::vec3(ball.position.x, ball.position.y, 0.0f)).y;
 
     process_Input(window);
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     std::string posX = "X: ";
@@ -198,7 +206,9 @@ int main()
     std::string posY = "Y: ";
     posY.append(std::to_string(inputPos.y));
 
+    // TODO fix textures, now we only have the color
     woodTexture.activiate_and_bind(GL_TEXTURE0);
+
     // textShader.set_uniform_matrix4_value("model", 1, glm::mat4(1.0f));
     // textShader.set_uniform_matrix4_value("projection", 1, projection);
     // RenderText(textShader, posX, 20.0f, inputPos.x, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -207,11 +217,17 @@ int main()
     player.handle_logic();
     enemy.handle_logic(ball);
     ball.handle_logic(deltaTime, player, enemy, xDirection, yDirection, prevPositionX, prevPositionY);
-    // std::cout << ball.position.x << "\r\n";
 
-    // std::cout << isCollidingX;
-    // std::cout << deltaTime << "\r\n";
+    // TODO remove ball and reset positions, if the ball enters this area
+    if (ball.position.x <= WINDOW_WIDTH && ball.position.x >= WINDOW_WIDTH * 0.8 + enemy.scale.x / 4)
+    {
+      std::cout << "Enemy area" << std::endl;
+    }
 
+    if (ball.position.x >= 0 && ball.position.x <= WINDOW_WIDTH * 0.2 - player.scale.x / 4)
+    {
+      std::cout << "Player area" << std::endl;
+    }
     // Swap front and back buffers
     glfwSwapBuffers(window);
     glfwPollEvents();

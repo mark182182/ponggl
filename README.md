@@ -12,6 +12,7 @@ includes folder:
 - Glad
 - stb
 - FreeType
+- irrKlang
 
 src:
 
@@ -20,6 +21,8 @@ src:
 - glad.c
 - glfw3.dll
 - glfw3dll.lib
+- irrKlang.dll
+- irrKlang.lib
 
 ## Build
 
