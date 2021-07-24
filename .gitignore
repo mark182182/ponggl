@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+.vscode
+glad
+KHR
+glad*
+GLFW
+glfw3dll.lib
+glfw3.dll
