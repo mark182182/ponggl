@@ -1,1 +1,1 @@
-These effects were created by [Helm](https://tytel.org/helm/).
+These effects were created with [Helm](https://tytel.org/helm/).
