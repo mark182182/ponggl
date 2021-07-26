@@ -17,13 +17,15 @@ class Ball : public Entity
 {
   using Entity::Entity;
   bool isColliding = false;
-  Audio audio;
 
 public:
+  Audio audio;
+
   void set_audio(Audio &_audio)
   {
     audio = _audio;
   };
+
   void handle_logic(float deltaTime, Player player, Enemy enemy, float &xDir, float &yDir, float &prevPositionX, float &prevPositionY)
   {
     if (std::round(position.y) > WINDOW_HEIGHT - scale.y / 4 && std::round(position.y) < WINDOW_HEIGHT)
@@ -39,21 +41,15 @@ public:
 
     if (check_collision(*this, player))
     {
-      if (prevPositionX - normPos.x < 0)
-      {
-        xDir = deltaTime;
-        yDir += std::rand() % 2 - 1;
-        play_random_sfx();
-      }
+      xDir = deltaTime;
+      yDir += std::rand() % 2 - 1;
+      play_random_sfx();
     }
     else if (check_collision(*this, enemy))
     {
-      if (prevPositionX - normPos.x > 0)
-      {
-        xDir = -1 * deltaTime;
-        yDir += std::rand() % 2 - 1;
-        play_random_sfx();
-      }
+      xDir = -1 * deltaTime;
+      yDir += std::rand() % 2 - 1;
+      play_random_sfx();
     }
 
     position.x = position.x + xDir;

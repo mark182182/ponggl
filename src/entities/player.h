@@ -16,6 +16,7 @@ class Player : public Entity
   using Entity::Entity;
 
 public:
+  float speed = 0.8f;
   void handle_logic()
   {
     shader.set_uniform_matrix4_value("model", 1, model);

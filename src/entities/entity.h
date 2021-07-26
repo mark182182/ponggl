@@ -23,13 +23,14 @@ public:
   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 0.0f);
   glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 normPos = glm::normalize(position);
+  float speed = 0.01f;
   Shader shader;
   Entity(){};
   ~Entity(){};
-  Entity(std::string entity_name, Shader &s, glm::mat4 proj, glm::vec2 size, glm::vec2 pos)
+  Entity(std::string entity_name, Shader &s, glm::mat4 proj, glm::vec2 _scale, glm::vec2 pos)
   {
     name = std::string(entity_name);
-    scale = glm::vec3(size.x, size.y, 0.0f);
+    scale = glm::vec3(_scale, 0.0f);
     shader = s;
     projection = proj;
     updatePosition(pos);
@@ -59,9 +60,9 @@ public:
     glDeleteBuffers(1, &vbo);
   }
 
-  void updatePosition(glm::vec2 pos)
+  void updatePosition(glm::vec2 &pos)
   {
-    position = glm::vec3(pos.x, pos.y, 0.0f);
+    position = glm::vec3(pos, 0.0f);
     normPos = glm::normalize(position);
   }
 
@@ -91,16 +92,7 @@ public:
 bool check_collision(Entity &one, Entity &two)
 {
   bool isCollidingX = one.position.x + one.scale.x / 4 >= two.position.x && two.position.x + two.scale.x / 4 >= one.position.x;
-  bool isCollidingY = one.position.y + one.scale.y / 3 >= two.position.y && two.position.y + two.scale.y / 3 >= one.position.y;
-  // TODO y doesn't seem to work properly (caused by the entity scale?)
-  if (two.name == "enemy" && isCollidingX && false)
-  {
-    std::cout << two.name << isCollidingY << "\r\n";
-    std::cout << "ballY: " << one.position.y << "\r\n";
-    std::cout << "ballS: " << one.position.y + one.scale.y / 3 << "\r\n";
-    std::cout << "enemyY: " << two.position.y << "\r\n";
-    std::cout << "enemyS: " << two.position.y + two.scale.y / 3 << "\r\n";
-  }
+  bool isCollidingY = one.position.y + one.scale.y / 2.5 >= two.position.y && two.position.y + two.scale.y / 2.5 >= one.position.y;
   return isCollidingX && isCollidingY;
 }
 

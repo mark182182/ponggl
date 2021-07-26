@@ -6,6 +6,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 glm::mat4 projection;
-glm::vec2 inputPos = glm::vec2(WINDOW_WIDTH * 0.2, 200.0f);
+glm::vec2 inputPos = glm::vec2(WINDOW_WIDTH * 0.2, WINDOW_HEIGHT * 0.5);
 
 #endif
