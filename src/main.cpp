@@ -3,10 +3,6 @@
 #include "texture.h"
 #include "projection.h"
 #include "text.h"
-#include "entities/entity.h"
-#include "entities/player.h"
-#include "entities/enemy.h"
-#include "entities/ball.h"
 #include "audio.h"
 #include "game.h"
 #include <GLFW/glfw3.h>
@@ -90,11 +86,9 @@ int main()
   }
 
   Game game = Game(window);
+  game.init_shaders();
   game.init_entities();
   game.set_state(State::GAMEPLAY);
-  Shader textShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
-
-  initText();
 
   std::cout << "Buffers are bound" << std::endl;
 
@@ -111,17 +105,7 @@ int main()
 
   std::cout << "Textures are set" << std::endl;
 
-  game.player.shader.use();
-  game.player.shader.set_int("image", 0);
-
-  game.enemy.shader.use();
-  game.enemy.shader.set_int("image", 0);
-
-  game.ball.shader.use();
-  game.ball.shader.set_int("image", 0);
-
-  textShader.use();
-  textShader.set_int("image", 0);
+  game.init_shader_vars();
 
   while (!glfwWindowShouldClose(window))
   {
@@ -132,7 +116,7 @@ int main()
     prevPositionY = glm::normalize(glm::vec3(game.ball.position.x, game.ball.position.y, 0.0f)).y;
     game.set_delta_time(deltaTime);
 
-    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     std::string posX = "X: ";
@@ -143,12 +127,9 @@ int main()
     // TODO fix textures, now we only have the color
     woodTexture.activiate_and_bind(GL_TEXTURE0);
 
-    // textShader.set_uniform_matrix4_value("model", 1, glm::mat4(1.0f));
-    // textShader.set_uniform_matrix4_value("projection", 1, projection);
-    // RenderText(textShader, posX, 20.0f, inputPos.x, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    // RenderText(textShader, posY, 10.0f, 300.0f, 1.0f, glm::vec3(1.0f, 0.0f, 1.0f));
-
     game.update_game_logic();
+    game.render_text(std::to_string(game.playerScore), 20.0f, 10.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    game.render_text(std::to_string(game.enemyScore), WINDOW_WIDTH * 0.95, 10.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
     // Swap front and back buffers
     glfwSwapBuffers(window);
@@ -158,7 +139,7 @@ int main()
   game.enemy.delete_buffers();
   game.ball.delete_buffers();
   game.player.shader.remove();
-  textShader.remove();
+  game.textShader.remove();
   game.enemy.shader.remove();
   glfwTerminate();
   return 0;

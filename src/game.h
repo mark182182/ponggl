@@ -28,11 +28,15 @@ class Game
   float prevPositionY;
   float deltaTime;
 
+  glm::mat4 projection;
+  Shader defaultShader;
+
 public:
   Player player;
   Enemy enemy;
   Ball ball;
   Input input;
+  Shader textShader;
 
   int playerScore = 0;
   int enemyScore = 0;
@@ -63,22 +67,46 @@ public:
     prevPositionX = _prevPositionY;
   }
 
+  void init_shaders()
+  {
+    defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
+    textShader = Shader("shaders/text_vertex.vs", "shaders/text_fragment.fs");
+
+    projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
+  }
+
   void init_entities()
   {
-    Shader defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
-    Shader enemyShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
-    Shader ballShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
-
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
-
     player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 4), inputPos);
-    enemy = Enemy("enemy", enemyShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 4), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5));
-    ball = Ball("ball", ballShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5));
+    enemy = Enemy("enemy", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 4), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5));
+    ball = Ball("ball", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5));
     ball.set_audio(audio);
+
+    textShader.use();
+    textShader.set_uniform_matrix4_value("projection", 1, projection);
+    initText();
 
     xDirection = -1;
     yDirection = 0;
     inputPos.y = WINDOW_HEIGHT * 0.5;
+  }
+
+  void init_shader_vars()
+  {
+    player.shader.use();
+    player.shader.set_int("image", 0);
+    enemy.shader.use();
+    enemy.shader.set_int("image", 0);
+    ball.shader.use();
+    ball.shader.set_int("image", 0);
+    textShader.use();
+    textShader.set_int("image", 0);
+  }
+
+  void render_text(std::string text, float x, float y, float scale,
+                   glm::vec3 color)
+  {
+    RenderText(textShader, text, x, y, scale, color);
   }
 
   void update_game_logic()
@@ -104,6 +132,7 @@ public:
 private:
   void handle_gameplay_logic()
   {
+    defaultShader.use();
     prevPositionX = glm::normalize(glm::vec3(ball.position.x, ball.position.y, 0.0f)).x;
     prevPositionY = glm::normalize(glm::vec3(ball.position.x, ball.position.y, 0.0f)).y;
 

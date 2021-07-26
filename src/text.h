@@ -96,6 +96,7 @@ void RenderText(Shader &s, std::string text, float x, float y, float scale,
   // activate corresponding render state
   s.use();
   s.set_float_3("textColor", color);
+
   glBindVertexArray(VAO);
   // iterate through all characters
   std::string::const_iterator c;
@@ -108,12 +109,12 @@ void RenderText(Shader &s, std::string text, float x, float y, float scale,
     float h = ch.Size.y * scale;
     // update VBO for each character
     float vertices[6][4] = {
-        {xpos, ypos + h, 0.0f, 0.0f},
-        {xpos, ypos, 0.0f, 1.0f},
-        {xpos + w, ypos, 1.0f, 1.0f},
-        {xpos, ypos + h, 0.0f, 0.0f},
-        {xpos + w, ypos, 1.0f, 1.0f},
-        {xpos + w, ypos + h, 1.0f, 0.0f}};
+        {xpos, ypos + h, 0.0f, 1.0f},
+        {xpos + w, ypos, 1.0f, 0.0f},
+        {xpos, ypos, 0.0f, 0.0f},
+        {xpos, ypos + h, 0.0f, 1.0f},
+        {xpos + w, ypos + h, 1.0f, 1.0f},
+        {xpos + w, ypos, 1.0f, 0.0f}};
     // render glyph texture over quad
     glBindTexture(GL_TEXTURE_2D, ch.TextureID);
     // update content of VBO memory

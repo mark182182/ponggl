@@ -7,8 +7,8 @@
 
 class Input
 {
-  bool wireframe_mode;
-  bool tab_pressed;
+  bool wireframe_mode = false;
+  bool tab_pressed = false;
   float newPos;
 
   GLFWwindow *window;
