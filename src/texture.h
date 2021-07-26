@@ -10,6 +10,8 @@ class Texture
   unsigned int ID;
 
 public:
+  Texture(){};
+  ~Texture(){};
   Texture(const char *path, GLenum format, unsigned int type)
   {
     glGenTextures(1, &ID);
@@ -18,7 +20,7 @@ public:
 
   void activiate_and_bind(GLenum texture)
   {
-    glActiveTexture(texture);
+    glActiveTexture(texture); 
     glBindTexture(GL_TEXTURE_2D, ID);
   };
 

@@ -22,7 +22,7 @@ class Game
   State state;
   GLFWwindow *window = NULL;
   Audio audio = Audio();
-  float xDirection = -1;
+  float xDirection = -1.0f;
   float yDirection = 0;
   float prevPositionX;
   float prevPositionY;
@@ -37,6 +37,7 @@ public:
   Ball ball;
   Input input;
   Shader textShader;
+  Texture patternTexture;
 
   int playerScore = 0;
   int enemyScore = 0;
@@ -72,35 +73,32 @@ public:
     defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
     textShader = Shader("shaders/text_vertex.vs", "shaders/text_fragment.fs");
 
+    patternTexture = Texture("textures/wood.jpg", GL_RGB, GL_REPEAT);
+
     projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
-  }
-
-  void init_entities()
-  {
-    player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 4), inputPos);
-    enemy = Enemy("enemy", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 4), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5));
-    ball = Ball("ball", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5));
-    ball.set_audio(audio);
-
-    textShader.use();
-    textShader.set_uniform_matrix4_value("projection", 1, projection);
-    initText();
-
-    xDirection = -1;
-    yDirection = 0;
-    inputPos.y = WINDOW_HEIGHT * 0.5;
   }
 
   void init_shader_vars()
   {
-    player.shader.use();
-    player.shader.set_int("image", 0);
-    enemy.shader.use();
-    enemy.shader.set_int("image", 0);
-    ball.shader.use();
-    ball.shader.set_int("image", 0);
-    textShader.use();
-    textShader.set_int("image", 0);
+    player.shader.use().set_int("image", 0);
+    enemy.shader.use().set_int("image", 0);
+    ball.shader.use().set_int("image", 0);
+    textShader.use().set_int("image", 0);
+  }
+
+  void init_entities()
+  {
+    player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), inputPos, patternTexture);
+    enemy = Enemy("enemy", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), patternTexture);
+    ball = Ball("ball", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), patternTexture);
+    ball.set_audio(audio);
+
+    textShader.set_uniform_matrix4_value("projection", 1, projection);
+    initText();
+
+    xDirection = -1.0f;
+    yDirection = 0;
+    inputPos.y = WINDOW_HEIGHT * 0.5;
   }
 
   void render_text(std::string text, float x, float y, float scale,

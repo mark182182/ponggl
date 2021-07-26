@@ -87,31 +87,22 @@ int main()
 
   Game game = Game(window);
   game.init_shaders();
+  game.init_shader_vars();
   game.init_entities();
   game.set_state(State::GAMEPLAY);
 
-  std::cout << "Buffers are bound" << std::endl;
-
   stbi_set_flip_vertically_on_load(true);
-
-  Texture woodTexture = Texture("textures/wood.jpg", GL_RGB, GL_REPEAT);
-  Texture transparentTexture =
-      Texture("textures/transparent.png", GL_RGBA, GL_REPEAT);
 
   glEnable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_DEPTH_TEST);
-
-  std::cout << "Textures are set" << std::endl;
-
-  game.init_shader_vars();
 
   while (!glfwWindowShouldClose(window))
   {
     float currentFrame = glfwGetTime();
-    deltaTime = (currentFrame - lastFrame) * 60 * 4;
+    deltaTime = (currentFrame - lastFrame);
     lastFrame = currentFrame;
+
     prevPositionX = glm::normalize(glm::vec3(game.ball.position.x, game.ball.position.y, 0.0f)).x;
     prevPositionY = glm::normalize(glm::vec3(game.ball.position.x, game.ball.position.y, 0.0f)).y;
     game.set_delta_time(deltaTime);
@@ -123,9 +114,6 @@ int main()
     posX.append(std::to_string(inputPos.x));
     std::string posY = "Y: ";
     posY.append(std::to_string(inputPos.y));
-
-    // TODO fix textures, now we only have the color
-    woodTexture.activiate_and_bind(GL_TEXTURE0);
 
     game.update_game_logic();
     game.render_text(std::to_string(game.playerScore), 20.0f, 10.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));

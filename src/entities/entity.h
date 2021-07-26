@@ -2,6 +2,7 @@
 #define ENTITY_H
 
 #include "../shaders/shader.h"
+#include "../texture.h"
 #include <iostream>
 #include <string>
 #include <glad/glad.h>
@@ -23,17 +24,19 @@ public:
   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 0.0f);
   glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 normPos = glm::normalize(position);
+  Texture texture;
   float speed = 0.01f;
   Shader shader;
   Entity(){};
   ~Entity(){};
-  Entity(std::string entity_name, Shader &s, glm::mat4 proj, glm::vec2 _scale, glm::vec2 pos)
+  Entity(std::string entity_name, Shader &s, glm::mat4 proj, glm::vec2 _scale, glm::vec2 pos, Texture &_texture)
   {
     name = std::string(entity_name);
     scale = glm::vec3(_scale, 0.0f);
     shader = s;
     projection = proj;
-    updatePosition(pos);
+    texture = _texture;
+    update_position(pos);
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     bind_buffers();
@@ -60,7 +63,7 @@ public:
     glDeleteBuffers(1, &vbo);
   }
 
-  void updatePosition(glm::vec2 &pos)
+  void update_position(glm::vec2 &pos)
   {
     position = glm::vec3(pos, 0.0f);
     normPos = glm::normalize(position);

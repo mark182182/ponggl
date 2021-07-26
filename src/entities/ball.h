@@ -20,6 +20,7 @@ class Ball : public Entity
 
 public:
   Audio audio;
+  float speed = 400.0f;
 
   void set_audio(Audio &_audio)
   {
@@ -30,34 +31,35 @@ public:
   {
     if (std::round(position.y) > WINDOW_HEIGHT - scale.y / 4 && std::round(position.y) < WINDOW_HEIGHT)
     {
-      yDir = -1 * deltaTime;
+      yDir = -1;
       play_random_sfx();
     }
     else if (std::round(position.y) < scale.y / 4 && std::round(position.y) > 0)
     {
-      yDir = 1 * deltaTime;
+      yDir = 1;
       play_random_sfx();
     }
 
     if (check_collision(*this, player))
     {
-      xDir = deltaTime;
-      yDir += std::rand() % 2 - 1;
+      xDir = 1;
+      yDir = std::rand() % 2 - 1;
       play_random_sfx();
     }
     else if (check_collision(*this, enemy))
     {
-      xDir = -1 * deltaTime;
-      yDir += std::rand() % 2 - 1;
+      xDir = -1;
+      yDir = std::rand() % 2 - 1;
       play_random_sfx();
     }
 
-    position.x = position.x + xDir;
-    position.y = position.y + yDir;
+    position.x += deltaTime * xDir * speed;
+    position.y += deltaTime * yDir * speed;
 
     shader.set_uniform_matrix4_value("model", 1, model);
     shader.set_uniform_matrix4_value("projection", 1, projection);
     shader.set_float_3("textColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    texture.activiate_and_bind(GL_TEXTURE0);
     bind();
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));

@@ -26,7 +26,7 @@ public:
     ID = create_shader_program(vertexShader, fragmentShader);
   };
 
-  void use() { glUseProgram(ID); };
+  Shader use() { glUseProgram(ID); return *this; };
 
   void remove() { glDeleteProgram(ID); };
 
