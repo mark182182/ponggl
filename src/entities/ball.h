@@ -43,13 +43,13 @@ public:
     if (check_collision(*this, player))
     {
       xDir = 1;
-      yDir = std::rand() % 2 - 1;
+      yDir = std::rand() % 2 - 1.5;
       play_random_sfx();
     }
     else if (check_collision(*this, enemy))
     {
       xDir = -1;
-      yDir = std::rand() % 2 - 1;
+      yDir = std::rand() % 4 - 2;
       play_random_sfx();
     }
 

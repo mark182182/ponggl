@@ -16,7 +16,7 @@ class Enemy : public Entity
   using Entity::Entity;
 
 public:
-  float speed = 0.02f;
+  float speed = 0.026f;
   void handle_logic(Entity &e)
   {
     float newPos = position.y + (e.position.y - position.y) * speed;

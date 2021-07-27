@@ -22,7 +22,7 @@ class Game
   State state;
   GLFWwindow *window = NULL;
   Audio audio = Audio();
-  float xDirection = -1.0f;
+  float xDirection = 0;
   float yDirection = 0;
   float prevPositionX;
   float prevPositionY;
@@ -41,6 +41,9 @@ public:
 
   int playerScore = 0;
   int enemyScore = 0;
+  bool playerGoal = false;
+  bool enemyGoal = false;
+
   Game(){};
   Game(GLFWwindow *_window)
   {
@@ -73,7 +76,7 @@ public:
     defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
     textShader = Shader("shaders/text_vertex.vs", "shaders/text_fragment.fs");
 
-    patternTexture = Texture("textures/wood.jpg", GL_RGB, GL_REPEAT);
+    patternTexture = Texture("textures/pad.png", GL_RGB, GL_CLAMP_TO_BORDER);
 
     projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
   }
@@ -90,33 +93,35 @@ public:
   {
     player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), inputPos, patternTexture);
     enemy = Enemy("enemy", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), patternTexture);
-    ball = Ball("ball", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), patternTexture);
+    Texture ballTexture = Texture("textures/ball1.png", GL_RGBA, GL_REPEAT);
+    ball = Ball("ball", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
     ball.set_audio(audio);
 
     textShader.set_uniform_matrix4_value("projection", 1, projection);
     initText();
 
-    xDirection = -1.0f;
+    xDirection = playerGoal ? 1.0f : -1.0f;
     yDirection = 0;
     inputPos.y = WINDOW_HEIGHT * 0.5;
-  }
-
-  void render_text(std::string text, float x, float y, float scale,
-                   glm::vec3 color)
-  {
-    RenderText(textShader, text, x, y, scale, color);
   }
 
   void update_game_logic()
   {
     // There should be a better way to update the input
     Input(window, player).process_Input();
+    Text playText = Text(textShader, "PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    Text optionsText = Text(textShader, "OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    Text exitText = Text(textShader, "EXIT", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     switch (state)
     {
     case MENU:
-      // TODO implement menu
+      playText.render_text();
+      optionsText.render_text();
+      exitText.render_text();
       break;
     case GAMEPLAY:
+      Text(textShader, std::to_string(playerScore), 20.0f, 40.0f + Text::charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      Text(textShader, std::to_string(enemyScore), WINDOW_WIDTH * 0.90, 40.0f + Text::charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       handle_gameplay_logic();
       break;
     case EXIT:
@@ -140,14 +145,18 @@ private:
 
     if (ball.position.x <= WINDOW_WIDTH && ball.position.x >= WINDOW_WIDTH * 0.8 + enemy.scale.x / 4)
     {
-      init_entities();
+      playerGoal = true;
+      enemyGoal = false;
       playerScore++;
+      init_entities();
     }
 
     if (ball.position.x >= 0 && ball.position.x <= WINDOW_WIDTH * 0.2 - player.scale.x / 4)
     {
-      init_entities();
+      playerGoal = false;
+      enemyGoal = true;
       enemyScore++;
+      init_entities();
     }
   }
 

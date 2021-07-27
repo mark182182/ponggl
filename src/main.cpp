@@ -116,8 +116,6 @@ int main()
     posY.append(std::to_string(inputPos.y));
 
     game.update_game_logic();
-    game.render_text(std::to_string(game.playerScore), 20.0f, 10.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    game.render_text(std::to_string(game.enemyScore), WINDOW_WIDTH * 0.95, 10.0f, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
     // Swap front and back buffers
     glfwSwapBuffers(window);
