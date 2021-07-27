@@ -69,6 +69,11 @@ public:
     normPos = glm::normalize(position);
   }
 
+  void update_scale(glm::vec2 &s)
+  {
+    scale = glm::vec3(s, 0.0f);
+  }
+
   void bind_buffers()
   {
     glGenVertexArrays(1, &vao);

@@ -5,21 +5,15 @@
 #include "entities/player.h"
 #include "entities/enemy.h"
 #include "entities/ball.h"
+#include "entities/selector.h"
+#include "game_state.h"
 #include "audio.h"
 #include "input.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-enum State
-{
-  MENU,
-  GAMEPLAY,
-  EXIT
-};
-
 class Game
 {
-  State state;
   GLFWwindow *window = NULL;
   Audio audio = Audio();
   float xDirection = 0;
@@ -35,9 +29,11 @@ public:
   Player player;
   Enemy enemy;
   Ball ball;
+  Selector selector;
+
   Input input;
   Shader textShader;
-  Texture patternTexture;
+  Texture padTexture;
 
   int playerScore = 0;
   int enemyScore = 0;
@@ -50,11 +46,6 @@ public:
     window = _window;
   }
   ~Game(){};
-
-  void set_state(State _state)
-  {
-    state = _state;
-  }
 
   void set_delta_time(float &_deltaTime)
   {
@@ -76,7 +67,7 @@ public:
     defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
     textShader = Shader("shaders/text_vertex.vs", "shaders/text_fragment.fs");
 
-    patternTexture = Texture("textures/pad.png", GL_RGB, GL_CLAMP_TO_BORDER);
+    padTexture = Texture("textures/pad.png", GL_RGB, GL_REPEAT);
 
     projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
   }
@@ -91,8 +82,8 @@ public:
 
   void init_entities()
   {
-    player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), inputPos, patternTexture);
-    enemy = Enemy("enemy", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), patternTexture);
+    player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), inputPos, padTexture);
+    enemy = Enemy("enemy", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), padTexture);
     Texture ballTexture = Texture("textures/ball1.png", GL_RGBA, GL_REPEAT);
     ball = Ball("ball", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
     ball.set_audio(audio);
@@ -108,16 +99,31 @@ public:
   void update_game_logic()
   {
     // There should be a better way to update the input
-    Input(window, player).process_Input();
+    Input input = Input(window, player);
     Text playText = Text(textShader, "PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     Text optionsText = Text(textShader, "OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     Text exitText = Text(textShader, "EXIT", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    switch (state)
+
+    input.add_to_selection(exitText);
+    input.add_to_selection(optionsText);
+    input.add_to_selection(playText);
+
+    Texture selectorTexture = Texture("textures/selector.png", GL_RGBA, GL_REPEAT);
+
+    selector = Selector("selector", defaultShader, projection, inputScale, inputPos, selectorTexture);
+
+    input.process_Input();
+    switch (GameState::state)
     {
     case MENU:
+      if (GameState::is_state_changed() || GameState::state == State::INIT)
+      {
+        input.move_selector(playText);
+      }
       playText.render_text();
       optionsText.render_text();
       exitText.render_text();
+      selector.handle_logic();
       break;
     case GAMEPLAY:
       Text(textShader, std::to_string(playerScore), 20.0f, 40.0f + Text::charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
@@ -141,7 +147,7 @@ private:
 
     player.handle_logic();
     enemy.handle_logic(ball);
-    ball.handle_logic(deltaTime, player, enemy, xDirection, yDirection, prevPositionX, prevPositionY);
+    ball.handle_logic(deltaTime, player, enemy, xDirection, yDirection);
 
     if (ball.position.x <= WINDOW_WIDTH && ball.position.x >= WINDOW_WIDTH * 0.8 + enemy.scale.x / 4)
     {

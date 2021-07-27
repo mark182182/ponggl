@@ -5,6 +5,7 @@
 #include "text.h"
 #include "audio.h"
 #include "game.h"
+#include "game_state.h"
 #include <GLFW/glfw3.h>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <fstream>
@@ -16,7 +17,6 @@
 #include <iostream>
 #include <stb_image.h>
 
-const char *WINDOW_NAME = "PongGL";
 GLFWwindow *window = NULL;
 
 float deltaTime = 0.0f;
@@ -50,6 +50,7 @@ int create_window_and_init_libs()
     glfwTerminate();
     return -1;
   }
+  glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
 
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -76,6 +77,17 @@ void bind_buffers(float vertices[], int vertices_size, unsigned int VBO,
   glBindVertexArray(0);
 }
 
+void destroy_window()
+{
+  game.player.delete_buffers();
+  game.enemy.delete_buffers();
+  game.ball.delete_buffers();
+  game.player.shader.remove();
+  game.textShader.remove();
+  game.enemy.shader.remove();
+  glfwTerminate();
+}
+
 int main()
 {
   init_and_set_window_hints();
@@ -89,7 +101,7 @@ int main()
   game.init_shaders();
   game.init_shader_vars();
   game.init_entities();
-  game.set_state(State::GAMEPLAY);
+  GameState::set_state(State::MENU);
 
   stbi_set_flip_vertically_on_load(true);
 
@@ -116,17 +128,10 @@ int main()
     posY.append(std::to_string(inputPos.y));
 
     game.update_game_logic();
-
     // Swap front and back buffers
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-  game.player.delete_buffers();
-  game.enemy.delete_buffers();
-  game.ball.delete_buffers();
-  game.player.shader.remove();
-  game.textShader.remove();
-  game.enemy.shader.remove();
-  glfwTerminate();
+  destroy_window();
   return 0;
 }

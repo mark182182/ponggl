@@ -33,6 +33,7 @@ public:
   std::string text;
   float x;
   float y;
+  float height = 0;
   float scale;
   glm::vec3 color;
 
@@ -48,19 +49,25 @@ public:
 
     std::string::const_iterator c;
     float firstPos;
+
+    int height = 0;
     for (c = text.begin(); c != text.end(); c++)
     {
       numOfChars++;
       Character ch = Characters[*c];
-      float xpos = x + ch.Bearing.x * scale;
+      float xpos = _x + ch.Bearing.x * scale;
+      float h = ch.Size.y;
+      if (h > height)
+      {
+        height = h;
+      }
       if (numOfChars == 1)
       {
         firstPos = xpos + ch.Size.x * scale;
       }
       width = (xpos + ch.Size.x * scale) - firstPos;
-      x += (ch.Advance >> 6) * scale;
+      _x += (ch.Advance >> 6) * scale;
     };
-    width *= 2;
   };
   ~Text(){};
 
@@ -72,10 +79,11 @@ public:
     glBindVertexArray(VAO);
     // iterate through all characters
     std::string::const_iterator c;
+    float _x = x;
     for (c = text.begin(); c != text.end(); c++)
     {
       Character ch = Characters[*c];
-      float xpos = x - width + ch.Bearing.x * scale;
+      float xpos = _x - width + ch.Bearing.x * scale;
       float ypos = y - charHeight - (ch.Size.y - ch.Bearing.y) * scale;
       float w = ch.Size.x * scale;
       float h = ch.Size.y * scale;
@@ -96,7 +104,7 @@ public:
       // render quad
       glDrawArrays(GL_TRIANGLES, 0, 6);
       // advance cursors for next glyph (advance is 1/64 pixels)
-      x += (ch.Advance >> 6) * scale; // bitshift by 6 (2^6 = 64)
+      _x += (ch.Advance >> 6) * scale; // bitshift by 6 (2^6 = 64)
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
