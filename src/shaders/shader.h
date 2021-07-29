@@ -1,8 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#include "../common.h"
 #include "../file_utils.h"
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>

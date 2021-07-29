@@ -9,11 +9,19 @@ enum State
   INIT
 };
 
+enum Difficulity
+{
+  EASY,
+  MEDIUM,
+  HARD
+};
+
 class GameState
 {
 
 public:
   inline static State state = INIT;
+  inline static Difficulity difficulity = EASY;
   inline static State prevState;
 
   static void set_state(State _state)
@@ -27,6 +35,11 @@ public:
     bool isChanged = GameState::prevState != GameState::state;
     GameState::prevState = state;
     return isChanged;
+  }
+
+  static void set_difficulity(Difficulity _difficulity)
+  {
+    GameState::difficulity = _difficulity;
   }
 };
 

@@ -2,16 +2,6 @@
 #define BALL_H
 
 #include "entity.h"
-#include "../shaders/shader.h"
-#include "../projection.h"
-#include "../audio.h"
-#include <iostream>
-#include <string>
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/vec3.hpp>
 
 class Ball : public Entity
 {
@@ -27,7 +17,7 @@ public:
     audio = _audio;
   };
 
-  void handle_logic(float deltaTime, Player player, Enemy enemy, float &xDir, float &yDir)
+  void handle_logic(Player player, Enemy enemy, float &xDir, float &yDir)
   {
     if (std::round(position.y) > WINDOW_HEIGHT - scale.y / 4 && std::round(position.y) < WINDOW_HEIGHT)
     {
@@ -61,6 +51,7 @@ public:
     shader.set_float_3("textColor", glm::vec3(1.0f, 1.0f, 1.0f));
     texture.activiate_and_bind(GL_TEXTURE0);
     bind();
+    update_position(position);
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
     model = glm::scale(model, glm::vec3(scale.x, scale.y, 0.0f));

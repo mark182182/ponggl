@@ -3,9 +3,15 @@
 
 #include "../shaders/shader.h"
 #include "../texture.h"
+#include "../shaders/shader.h"
+#include "../projection.h"
+#include "../audio.h"
 #include <iostream>
 #include <string>
-#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/vec3.hpp>
 
 class Entity
 {
@@ -66,6 +72,12 @@ public:
   void update_position(glm::vec2 &pos)
   {
     position = glm::vec3(pos, 0.0f);
+    normPos = glm::normalize(position);
+  }
+
+    void update_position(glm::vec3 &pos)
+  {
+    position = glm::vec3(pos);
     normPos = glm::normalize(position);
   }
 

@@ -7,75 +7,71 @@
 #include "entities/player.h"
 #include "game_state.h"
 
+Player player;
+bool wireframe_mode;
+bool tab_pressed;
+int currentSelection;
+
 class Input
 {
-  float newPos;
-
-  GLFWwindow *window;
-  Player player;
-
-  bool wireframe_mode = false;
-  bool tab_pressed = false;
-  bool w_pressed = false;
-  bool s_pressed = false;
 
 public:
-  std::vector<Text> selections;
-  int currentSelection = 0;
+  inline static std::vector<Text> selections;
 
-  Input(){};
-  ~Input(){};
-  Input(GLFWwindow *_window, Player &_player)
+  static void init_input()
   {
-    window = _window;
-    player = _player;
+    wireframe_mode = false;
+    currentSelection = 3;
+    glfwSetKeyCallback(window, process_input);
   };
-  void process_Input()
+
+  static void set_player(Player &_player)
+  {
+    player = _player;
+  }
+
+  static void process_input(GLFWwindow *_window, int key, int scancode, int action, int mods)
   {
     switch (GameState::state)
     {
-    case MENU:
-      menu_controls();
+    case MENU | INIT:
+      menu_controls(key, action);
       break;
     case GAMEPLAY:
-      gameplay_controls();
+      gameplay_controls(key, action);
       break;
     default:
-      menu_controls();
+      menu_controls(key, action);
     };
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-      glfwSetWindowShouldClose(window, true);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+      glfwSetWindowShouldClose(_window, true);
   };
 
-  void move_selector(Text &text)
+  static void move_selector(Text &text)
   {
     inputPos = glm::vec2(text.x - text.width - 10.0f, text.y - text.charHeight - 10.0f);
     inputScale = glm::vec2(text.x + 40.0f, text.charHeight * 2 + 30.0f);
   }
 
-  void add_to_selection(Text &text)
+  static void add_to_selection(Text &text)
   {
-    this->selections.push_back(text);
+    selections.push_back(text);
   }
 
-private:
-  void menu_controls()
+  static void menu_controls(int &key, int &action)
   {
-    // TODO fix this
-    int w_press = glfwGetKey(window, GLFW_KEY_W);
-    int s_press = glfwGetKey(window, GLFW_KEY_TAB);
-    if (w_press == GLFW_PRESS && !w_pressed)
+    bool is_w_press = key == GLFW_KEY_W;
+    bool is_s_press = key == GLFW_KEY_S;
+    if (is_w_press && action == GLFW_PRESS)
     {
-      w_pressed = true;
-      if (currentSelection < selections.size())
+      if (currentSelection < selections.size() - 1)
       {
         currentSelection++;
         move_selector(selections[currentSelection]);
       }
     }
-    if (s_press == GLFW_PRESS && !s_pressed)
+    if (is_s_press && action == GLFW_PRESS)
     {
-      s_pressed = true;
       if (currentSelection > 0)
       {
         currentSelection--;
@@ -85,24 +81,27 @@ private:
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
       // TODO
-    }
-    if (w_press == GLFW_RELEASE)
-    {
-      w_pressed = false;
-    }
-    if (s_press == GLFW_RELEASE)
-    {
-      std::cout << s_pressed << "\r\n";
-      s_pressed = false;
+      switch (currentSelection)
+      {
+      case 3:
+        GameState::set_state(GAMEPLAY);
+        break;
+      case 2:
+        break;
+      case 0:
+        GameState::set_state(EXIT);
+        break;
+      default:
+        GameState::set_state(EXIT);
+      }
     }
   };
-  void gameplay_controls()
+  static void gameplay_controls(int &key, int &action)
   {
-    int tab_press = glfwGetKey(window, GLFW_KEY_TAB);
+    bool is_tab_press = key == GLFW_KEY_TAB;
 
-    if (tab_press == GLFW_PRESS && !tab_pressed)
+    if (is_tab_press && action == GLFW_PRESS)
     {
-      tab_pressed = true;
       wireframe_mode = !wireframe_mode;
       if (wireframe_mode)
       {
@@ -113,26 +112,34 @@ private:
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       }
     }
-    if (tab_press == GLFW_RELEASE)
-    {
-      tab_pressed = false;
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    bool is_w_press = key == GLFW_KEY_W;
+    bool is_s_press = key == GLFW_KEY_S;
+    if (is_w_press && action == GLFW_PRESS || is_w_press && action == GLFW_REPEAT)
     {
-      newPos = inputPos.y - 10.0f * player.speed;
-      if (newPos > 0)
+      if (player.position.y > 0)
       {
-        inputPos.y = newPos;
+        inputPos.y = -1;
+      }
+      else
+      {
+        inputPos.y = -0;
       }
     }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (is_s_press && action == GLFW_PRESS || is_s_press && action == GLFW_REPEAT)
     {
-      newPos = inputPos.y + 10.0f * player.speed;
-      if (newPos < WINDOW_HEIGHT - player.scale.y / 2.5)
+      if (player.position.y < WINDOW_HEIGHT - player.scale.y / 2.5)
       {
-        inputPos.y = newPos;
+        inputPos.y = 1;
       }
+      else
+      {
+        inputPos.y = 0;
+      }
+    }
+    if (is_w_press && action == GLFW_RELEASE || is_s_press && action == GLFW_RELEASE)
+    {
+      inputPos.y = 0;
     }
   };
 };

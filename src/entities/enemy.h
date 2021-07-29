@@ -5,7 +5,6 @@
 #include "../shaders/shader.h"
 #include <iostream>
 #include <string>
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -16,10 +15,9 @@ class Enemy : public Entity
   using Entity::Entity;
 
 public:
-  float speed = 0.026f;
   void handle_logic(Entity &e)
   {
-    float newPos = position.y + (e.position.y - position.y) * speed;
+    float newPos = position.y + (e.position.y - position.y) * deltaTime * speed;
     if (newPos < WINDOW_HEIGHT - scale.y / 2.5)
     {
       position.y = newPos;
@@ -29,6 +27,7 @@ public:
     shader.set_float_3("textColor", glm::vec3(1.0f, 1.0f, 1.0f));
     texture.activiate_and_bind(GL_TEXTURE0);
     bind();
+    update_position(position);
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
     model = glm::scale(model, glm::vec3(scale.x, scale.y, 0.0f));

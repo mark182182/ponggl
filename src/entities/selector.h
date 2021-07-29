@@ -1,17 +1,7 @@
-#ifndef MENU_H
-#define MENU_H
+#ifndef SELECTOR_H
+#define SELECTOR_H
 
-#include <GLFW/glfw3.h>
 #include "entity.h"
-#include "../shaders/shader.h"
-#include "../projection.h"
-#include <iostream>
-#include <string>
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/vec3.hpp>
 
 class Selector : public Entity
 {

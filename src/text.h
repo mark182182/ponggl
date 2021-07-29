@@ -4,7 +4,6 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <ft2build.h>
@@ -25,7 +24,7 @@ unsigned int VAO, VBO;
 
 class Text
 {
-public:
+public: 
   static const unsigned int charHeight = 48;
   int width = 0;
   unsigned int numOfChars = 0;
@@ -37,6 +36,7 @@ public:
   float scale;
   glm::vec3 color;
 
+  Text(){};
   Text(Shader &_s, std::string _text, float _x, float _y, float _scale,
        glm::vec3 _color)
   {
