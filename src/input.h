@@ -21,7 +21,7 @@ public:
   static void init_input()
   {
     wireframe_mode = false;
-    currentSelection = 3;
+    currentSelection = 0;
     glfwSetKeyCallback(window, process_input);
   };
 
@@ -49,8 +49,11 @@ public:
 
   static void move_selector(Text &text)
   {
-    inputPos = glm::vec2(text.x - text.width - 10.0f, text.y - text.charHeight - 10.0f);
-    inputScale = glm::vec2(text.x + 40.0f, text.charHeight * 2 + 30.0f);
+    // TODO fix scale
+    std::cout << text.x << "\n";
+    std::cout << text.x + text.width << "\n";
+    inputPos = glm::vec2(text.x - 10.0f, text.y - 10.0f);
+    inputScale = glm::vec2(text.x + text.width, text.charHeight * 2 + 30.0f);
   }
 
   static void add_to_selection(Text &text)
@@ -64,17 +67,17 @@ public:
     bool is_s_press = key == GLFW_KEY_S;
     if (is_w_press && action == GLFW_PRESS)
     {
-      if (currentSelection < selections.size() - 1)
+      if (currentSelection > 0)
       {
-        currentSelection++;
+        currentSelection--;
         move_selector(selections[currentSelection]);
       }
     }
     if (is_s_press && action == GLFW_PRESS)
     {
-      if (currentSelection > 0)
+      if (currentSelection < selections.size() - 1)
       {
-        currentSelection--;
+        currentSelection++;
         move_selector(selections[currentSelection]);
       }
     }
@@ -83,12 +86,14 @@ public:
       // TODO
       switch (currentSelection)
       {
-      case 3:
+      case 0:
         GameState::set_state(GAMEPLAY);
+        break;
+      case 1:
         break;
       case 2:
         break;
-      case 0:
+      case 3:
         GameState::set_state(EXIT);
         break;
       default:

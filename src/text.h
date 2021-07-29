@@ -19,12 +19,12 @@ struct Character
   unsigned int Advance;
 };
 
-std::map<char, Character> Characters;
-unsigned int VAO, VBO;
+static std::map<char, Character> Characters;
+static unsigned int VAO, VBO;
 
 class Text
 {
-public: 
+public:
   static const unsigned int charHeight = 48;
   int width = 0;
   unsigned int numOfChars = 0;
@@ -32,59 +32,68 @@ public:
   std::string text;
   float x;
   float y;
-  float height = 0;
   float scale;
   glm::vec3 color;
 
   Text(){};
-  Text(Shader &_s, std::string _text, float _x, float _y, float _scale,
-       glm::vec3 _color)
+  Text(std::string _text, float _x, float _y)
   {
-    s = _s;
     text = _text;
+    width = _x;
+    // TODO fix width
+    width += _text.length() * (Characters['H'].Bearing.x + Characters['H'].Size.x + Characters['H'].Advance >> 6);
     x = _x;
     y = _y;
-    scale = _scale;
-    color = _color;
-
-    std::string::const_iterator c;
-    float firstPos;
-
-    int height = 0;
-    for (c = text.begin(); c != text.end(); c++)
-    {
-      numOfChars++;
-      Character ch = Characters[*c];
-      float xpos = _x + ch.Bearing.x * scale;
-      float h = ch.Size.y;
-      if (h > height)
-      {
-        height = h;
-      }
-      if (numOfChars == 1)
-      {
-        firstPos = xpos + ch.Size.x * scale;
-      }
-      width = (xpos + ch.Size.x * scale) - firstPos;
-      _x += (ch.Advance >> 6) * scale;
-    };
   };
   ~Text(){};
 
+  void setShader(Shader &_s)
+  {
+    s = _s;
+  }
+
+  void setX(float _x)
+  {
+    x = _x;
+  }
+
+  void setY(float _y)
+  {
+    y = _y;
+  }
+
+  void setScale(float _scale)
+  {
+    scale = _scale;
+  }
+
+  void setColor(glm::vec3 _color)
+  {
+    color = _color;
+  }
+
+  Text set_vars_for_render(Shader &_s, float _scale, glm::vec3 _color)
+  {
+    s = _s;
+    scale = _scale;
+    color = _color;
+    return *this;
+  }
+
   void render_text()
   {
+    float _x = x;
     // activate corresponding render state
     s.use();
     s.set_float_3("textColor", color);
     glBindVertexArray(VAO);
     // iterate through all characters
     std::string::const_iterator c;
-    float _x = x;
     for (c = text.begin(); c != text.end(); c++)
     {
       Character ch = Characters[*c];
-      float xpos = _x - width + ch.Bearing.x * scale;
-      float ypos = y - charHeight - (ch.Size.y - ch.Bearing.y) * scale;
+      float xpos = _x + ch.Bearing.x * scale;
+      float ypos = y + (Characters['H'].Bearing.y - ch.Bearing.y) * scale;
       float w = ch.Size.x * scale;
       float h = ch.Size.y * scale;
       // update VBO for each character
@@ -111,7 +120,7 @@ public:
   };
 };
 
-void initText()
+static void initText()
 {
   FT_Library ft;
   if (FT_Init_FreeType(&ft))

@@ -10,13 +10,11 @@
 
 class Menu
 {
-  Text optionsText;
-  Text controlsText;
-  Text exitText;
+  std::vector<Text> texts;
+
+  Selector selector;
 
 public:
-  Text playText;
-
   Shader defaultShader;
   Shader textShader;
 
@@ -25,39 +23,39 @@ public:
   {
     defaultShader = _defaultShader;
     textShader = _textShader;
-    playText = Text(textShader, "PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    optionsText = Text(textShader, "OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    // TODO WEIRD BLACK, doesn't show up
-    controlsText = Text(textShader, "CONTROLS", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    exitText = Text(textShader, "EXIT", WINDOW_WIDTH * 0.5, controlsText.y + controlsText.charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    Texture selectorTexture = Texture("textures/selector.png", GL_RGBA, GL_REPEAT);
+    selector = Selector("selector", defaultShader, inputScale, inputPos, selectorTexture);
   };
   ~Menu(){};
+
+  void add_text(Text text)
+  {
+    this->texts.push_back(text);
+  }
 
   void init()
   {
 
     if (Input::selections.empty())
     {
-      Input::add_to_selection(exitText);
-      Input::add_to_selection(controlsText);
-      Input::add_to_selection(optionsText);
-      Input::add_to_selection(playText);
+      for (size_t i = 0; i < texts.size(); i++)
+      {
+        Input::add_to_selection(texts[i]);
+      }
     };
   };
 
   void render()
   {
+    for (size_t i = 0; i < texts.size(); i++)
+    {
+      texts[i].render_text();
+    }
     if (GameState::is_state_changed() || GameState::state == State::INIT)
     {
-      Input::move_selector(playText);
+      Input::move_selector(texts[0]);
     }
-    // std::cout << defaultShader.ID << "\r\n";
-    playText.render_text();
-    optionsText.render_text();
-    controlsText.render_text();
-    exitText.render_text();
-    Texture selectorTexture = Texture("textures/selector.png", GL_RGBA, GL_REPEAT);
-    Selector("selector", defaultShader, projection, inputScale, inputPos, selectorTexture).handle_logic();
+    selector.handle_logic();
   };
 };
 

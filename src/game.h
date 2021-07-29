@@ -18,8 +18,6 @@ class Game
   float xDirection = 0;
   float yDirection = 0;
 
-  glm::mat4 projection;
-
   int playerScore = 0;
   int enemyScore = 0;
   bool playerGoal = false;
@@ -44,17 +42,16 @@ public:
   {
     defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
     textShader = Shader("shaders/text_vertex.vs", "shaders/text_fragment.fs");
+    initText();
 
     padTexture = Texture("textures/pad.png", GL_RGBA, GL_REPEAT);
 
     projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
-
-    menu = Menu(defaultShader, textShader);
-    menu.init();
   }
 
   void init_shader_vars()
   {
+    defaultShader.use().set_int("image", 0);
     player.shader.use().set_int("image", 0);
     enemy.shader.use().set_int("image", 0);
     ball.shader.use().set_int("image", 0);
@@ -63,10 +60,12 @@ public:
 
   void init_entities()
   {
-    player = Player("player", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.2, WINDOW_HEIGHT * 0.5), padTexture);
+    player = Player("player", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.2, WINDOW_HEIGHT * 0.5), padTexture);
     Input::init_input();
 
-    enemy = Enemy("enemy", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), padTexture);
+    enemy = Enemy("enemy", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), padTexture);
+    Texture ballTexture = Texture("textures/ball1.png", GL_RGBA, GL_REPEAT);
+
     switch (GameState::difficulity)
     {
     EASY:
@@ -81,20 +80,40 @@ public:
     default:
       enemy.speed = 1.5f;
     }
-    Texture ballTexture = Texture("textures/ball1.png", GL_RGBA, GL_REPEAT);
-    ball = Ball("ball", defaultShader, projection, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
+    ball = Ball("ball", defaultShader, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
     ball.set_audio(audio);
 
+    menu = Menu(defaultShader, textShader);
+    set_menu_texts();
+    menu.init();
+
     textShader.set_uniform_matrix4_value("projection", 1, projection);
-    initText();
 
     xDirection = playerGoal ? 1.0f : -1.0f;
     yDirection = 0;
   }
 
+  void set_menu_texts()
+  {
+    Text playText = Text("PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5);
+    playText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    menu.add_text(playText);
+
+    Text optionsText = Text("OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight);
+    optionsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    menu.add_text(optionsText);
+
+    Text controlsText = Text("CONTROLS", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight);
+    controlsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    menu.add_text(controlsText);
+
+    Text exitText = Text("rekesPITEFasz", WINDOW_WIDTH * 0.5, controlsText.y + controlsText.charHeight);
+    exitText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    menu.add_text(exitText);
+  }
+
   void update_game_logic()
   {
-
     switch (GameState::state)
     {
     case MENU:
@@ -107,9 +126,8 @@ public:
         inputPos.y = 0.0f;
         player.position.y = WINDOW_HEIGHT * 0.5;
       }
-      Text(textShader, std::to_string(playerScore), 20.0f, 40.0f + Text::charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f))
-          .render_text();
-      Text(textShader, std::to_string(enemyScore), WINDOW_WIDTH * 0.95, 40.0f + Text::charHeight, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      Text(std::to_string(playerScore), 20.0f, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      Text(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       Input::set_player(player);
       handle_gameplay_logic();
       break;
