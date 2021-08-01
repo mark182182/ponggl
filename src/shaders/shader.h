@@ -5,7 +5,6 @@
 #include "../file_utils.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 
 class Shader
 {

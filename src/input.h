@@ -6,22 +6,25 @@
 #include "projection.h"
 #include "entities/player.h"
 #include "game_state.h"
+#include "text/text.h"
 
 Player player;
 bool wireframe_mode;
 bool tab_pressed;
-int currentSelection;
 
 class Input
 {
 
 public:
-  inline static std::vector<Text> selections;
+  inline static int currentSelection = 0;
+  inline static int selectionSize = 0;
+  inline static bool selectionSignal = false;
+
+  inline static Audio audio;
 
   static void init_input()
   {
     wireframe_mode = false;
-    currentSelection = 0;
     glfwSetKeyCallback(window, process_input);
   };
 
@@ -47,20 +50,6 @@ public:
       glfwSetWindowShouldClose(_window, true);
   };
 
-  static void move_selector(Text &text)
-  {
-    // TODO fix scale
-    std::cout << text.x << "\n";
-    std::cout << text.x + text.width << "\n";
-    inputPos = glm::vec2(text.x - 10.0f, text.y - 10.0f);
-    inputScale = glm::vec2(text.x + text.width, text.charHeight * 2 + 30.0f);
-  }
-
-  static void add_to_selection(Text &text)
-  {
-    selections.push_back(text);
-  }
-
   static void menu_controls(int &key, int &action)
   {
     bool is_w_press = key == GLFW_KEY_W;
@@ -70,15 +59,13 @@ public:
       if (currentSelection > 0)
       {
         currentSelection--;
-        move_selector(selections[currentSelection]);
       }
     }
     if (is_s_press && action == GLFW_PRESS)
     {
-      if (currentSelection < selections.size() - 1)
+      if (Input::currentSelection < selectionSize - 1)
       {
         currentSelection++;
-        move_selector(selections[currentSelection]);
       }
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
@@ -87,11 +74,16 @@ public:
       switch (currentSelection)
       {
       case 0:
+        audio.playSfx("audio/click.mp3");
         GameState::set_state(GAMEPLAY);
         break;
       case 1:
+        audio.playSfx("audio/click.mp3");
+        send_singnal();
         break;
       case 2:
+        audio.playSfx("audio/click.mp3");
+        send_singnal();
         break;
       case 3:
         GameState::set_state(EXIT);
@@ -101,10 +93,10 @@ public:
       }
     }
   };
+
   static void gameplay_controls(int &key, int &action)
   {
     bool is_tab_press = key == GLFW_KEY_TAB;
-
     if (is_tab_press && action == GLFW_PRESS)
     {
       wireframe_mode = !wireframe_mode;
@@ -146,6 +138,12 @@ public:
     {
       inputPos.y = 0;
     }
+  };
+
+  static void send_singnal()
+  {
+    selectionSignal = !selectionSignal;
+    selectionSignal = !selectionSignal;
   };
 };
 

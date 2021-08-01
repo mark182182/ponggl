@@ -9,7 +9,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "shaders/shader.h"
+#include "../shaders/shader.h"
 
 struct Character
 {
@@ -31,7 +31,9 @@ public:
   Shader s;
   std::string text;
   float x;
+  float lastX;
   float y;
+  float lastY;
   float scale;
   glm::vec3 color;
 
@@ -39,9 +41,8 @@ public:
   Text(std::string _text, float _x, float _y)
   {
     text = _text;
-    width = _x;
-    // TODO fix width
-    width += _text.length() * (Characters['H'].Bearing.x + Characters['H'].Size.x + Characters['H'].Advance >> 6);
+    // Find a better way to calculate a length of one character
+    width = 165.0f * _text.length();
     x = _x;
     y = _y;
   };
@@ -94,6 +95,7 @@ public:
       Character ch = Characters[*c];
       float xpos = _x + ch.Bearing.x * scale;
       float ypos = y + (Characters['H'].Bearing.y - ch.Bearing.y) * scale;
+      lastY = ypos;
       float w = ch.Size.x * scale;
       float h = ch.Size.y * scale;
       // update VBO for each character
@@ -115,6 +117,7 @@ public:
       // advance cursors for next glyph (advance is 1/64 pixels)
       _x += (ch.Advance >> 6) * scale; // bitshift by 6 (2^6 = 64)
     }
+    lastX = _x;
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
   };

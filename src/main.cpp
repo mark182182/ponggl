@@ -2,28 +2,15 @@
 #include "shaders/shader.h"
 #include "texture.h"
 #include "projection.h"
-#include "text.h"
 #include "audio.h"
 #include "game.h"
 #include "game_state.h"
 #include "window.h"
 #include <bullet/btBulletDynamicsCommon.h>
 #include <fstream>
-#include <iostream>
 #include <stb_image.h>
 
 Game game;
-
-void destroy_window()
-{
-  game.player.delete_buffers();
-  game.enemy.delete_buffers();
-  game.ball.delete_buffers();
-  game.player.shader.remove();
-  game.textShader.remove();
-  game.enemy.shader.remove();
-  glfwTerminate();
-}
 
 int main()
 {
@@ -57,6 +44,7 @@ int main()
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-  destroy_window();
+  game.destroy_window();
+  glfwTerminate();
   return 0;
 }

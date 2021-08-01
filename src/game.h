@@ -8,7 +8,9 @@
 #include "game_state.h"
 #include "audio.h"
 #include "input.h"
-#include "menu.h"
+#include "menu/menu.h"
+#include "text/display_text.h"
+#include "text/menu_text.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -62,6 +64,7 @@ public:
   {
     player = Player("player", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.2, WINDOW_HEIGHT * 0.5), padTexture);
     Input::init_input();
+    Input::audio = audio;
 
     enemy = Enemy("enemy", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), padTexture);
     Texture ballTexture = Texture("textures/ball1.png", GL_RGBA, GL_REPEAT);
@@ -85,7 +88,6 @@ public:
 
     menu = Menu(defaultShader, textShader);
     set_menu_texts();
-    menu.init();
 
     textShader.set_uniform_matrix4_value("projection", 1, projection);
 
@@ -95,19 +97,19 @@ public:
 
   void set_menu_texts()
   {
-    Text playText = Text("PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5);
+    MenuText playText = MenuText("PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5);
     playText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     menu.add_text(playText);
 
-    Text optionsText = Text("OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight);
+    MenuText optionsText = MenuText("OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight);
     optionsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     menu.add_text(optionsText);
 
-    Text controlsText = Text("CONTROLS", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight);
+    MenuText controlsText = MenuText("CONTROLS", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight);
     controlsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     menu.add_text(controlsText);
 
-    Text exitText = Text("rekesPITEFasz", WINDOW_WIDTH * 0.5, controlsText.y + controlsText.charHeight);
+    MenuText exitText = MenuText("EXIT", WINDOW_WIDTH * 0.5, controlsText.y + controlsText.charHeight);
     exitText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     menu.add_text(exitText);
   }
@@ -117,7 +119,6 @@ public:
     switch (GameState::state)
     {
     case MENU:
-      // TODO fix the menu
       menu.render();
       break;
     case GAMEPLAY:
@@ -126,8 +127,8 @@ public:
         inputPos.y = 0.0f;
         player.position.y = WINDOW_HEIGHT * 0.5;
       }
-      Text(std::to_string(playerScore), 20.0f, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
-      Text(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      DisplayText(std::to_string(playerScore), 20.0f, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      DisplayText(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       Input::set_player(player);
       handle_gameplay_logic();
       break;
@@ -137,6 +138,16 @@ public:
     default:
       exit_game();
     }
+  };
+
+  void destroy_window()
+  {
+    player.delete_buffers();
+    enemy.delete_buffers();
+    ball.delete_buffers();
+    player.shader.remove();
+    textShader.remove();
+    enemy.shader.remove();
   };
 
 private:
