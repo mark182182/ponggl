@@ -5,7 +5,7 @@
 #include "../common.h"
 #include "../shaders/shader.h"
 #include "../entities/selector.h"
-#include "../text/text.h"
+#include "../text.h"
 
 class Menu
 {
@@ -18,7 +18,11 @@ public:
   Audio audio;
 
   std::vector<Text> selections;
-  int currentSelection = 0;
+  std::vector<Text> displayTexts;
+  int currentSelectorPos = 0;
+  int currentSelection = -1;
+
+  bool is_e_pressed = false;
 
   Menu(){};
   Menu(Shader &_defaultShader, Shader &_textShader, Audio &_audio)
@@ -30,9 +34,20 @@ public:
     audio = _audio;
   };
 
+  void init()
+  {
+    currentSelectorPos = 0;
+    currentSelection = -1;
+  }
+
   void add_text(Text text)
   {
     this->selections.push_back(text);
+  }
+
+  void add_display_text(Text text)
+  {
+    this->displayTexts.push_back(text);
   }
 
   void move_selector(Text &text)
@@ -43,6 +58,10 @@ public:
 
   void render()
   {
+    for (size_t i = 0; i < displayTexts.size(); i++)
+    {
+      displayTexts[i].render_text();
+    }
     for (size_t i = 0; i < selections.size(); i++)
     {
       selections[i].render_text();
@@ -53,7 +72,7 @@ public:
     }
     else
     {
-      move_selector(selections[currentSelection]);
+      move_selector(selections[currentSelectorPos]);
     }
     selector.handle_logic();
   };

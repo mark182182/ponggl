@@ -7,9 +7,9 @@
 #include "entities/ball.h"
 #include "game_state.h"
 #include "audio.h"
-#include "text/text.h"
-#include "text/display_text.h"
+#include "text.h"
 #include "menu/main_menu.h"
+#include "menu/controls_menu.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -37,6 +37,7 @@ public:
 
   Texture padTexture;
   MainMenu mainMenu;
+  ControlsMenu controlsMenu;
 
   Game(){};
   ~Game(){};
@@ -50,6 +51,13 @@ public:
     padTexture = Texture("textures/pad.png", GL_RGBA, GL_REPEAT);
 
     projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
+
+    mainMenu = MainMenu(defaultShader, textShader, audio);
+    mainMenu.set_menu_texts();
+
+    controlsMenu = ControlsMenu(defaultShader, textShader, audio);
+    controlsMenu.set_parent_menu(&mainMenu);
+    controlsMenu.set_menu_texts();
   }
 
   void init_shader_vars()
@@ -85,9 +93,6 @@ public:
     ball = Ball("ball", defaultShader, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
     ball.set_audio(audio);
 
-    mainMenu = MainMenu(defaultShader, textShader, audio);
-    mainMenu.set_menu_texts();
-
     textShader.set_uniform_matrix4_value("projection", 1, projection);
 
     xDirection = playerGoal ? 1.0f : -1.0f;
@@ -99,8 +104,19 @@ public:
     switch (GameState::state)
     {
     case MENU:
-      mainMenu.menu_controls();
-      mainMenu.render();
+      switch (mainMenu.currentSelection)
+      {
+      case 1:
+        // TODO options menu here
+        break;
+      case 2:
+        controlsMenu.menu_controls();
+        controlsMenu.render();
+        break;
+      default:
+        mainMenu.menu_controls();
+        mainMenu.render();
+      }
       break;
     case GAMEPLAY:
       if (GameState::is_state_changed())
@@ -108,8 +124,8 @@ public:
         inputPos.y = 0.0f;
         player.position.y = WINDOW_HEIGHT * 0.5;
       }
-      DisplayText(std::to_string(playerScore), 20.0f, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
-      DisplayText(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      Text(std::to_string(playerScore), 20.0f, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      Text(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       gameplay_controls();
       handle_gameplay_logic();
       break;

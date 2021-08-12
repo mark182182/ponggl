@@ -9,7 +9,6 @@ class MainMenu : public Menu
 
   bool is_w_pressed = false;
   bool is_s_pressed = false;
-  bool is_e_pressed = false;
 
 public:
   void menu_controls()
@@ -19,9 +18,9 @@ public:
     if (w_key == GLFW_PRESS && !is_w_pressed)
     {
       is_w_pressed = true;
-      if (currentSelection > 0)
+      if (currentSelectorPos > 0)
       {
-        currentSelection--;
+        currentSelectorPos--;
       }
     }
     if (w_key == GLFW_RELEASE)
@@ -31,9 +30,9 @@ public:
     if (s_key == GLFW_PRESS && !is_s_pressed)
     {
       is_s_pressed = true;
-      if (currentSelection < selections.size() - 1)
+      if (currentSelectorPos < selections.size() - 1)
       {
-        currentSelection++;
+        currentSelectorPos++;
       }
     }
     if (s_key == GLFW_RELEASE)
@@ -44,16 +43,19 @@ public:
     if (e_key == GLFW_PRESS && !is_e_pressed)
     {
       is_e_pressed = true;
-      switch (currentSelection)
+      switch (currentSelectorPos)
       {
       case 0:
         audio.playSfx("audio/click.mp3");
+        currentSelection = currentSelectorPos;
         GameState::set_state(GAMEPLAY);
         break;
       case 1:
+        currentSelection = currentSelectorPos;
         audio.playSfx("audio/click.mp3");
         break;
       case 2:
+        currentSelection = currentSelectorPos;
         audio.playSfx("audio/click.mp3");
         break;
       case 3:
@@ -70,19 +72,19 @@ public:
   };
   void set_menu_texts()
   {
-    Text playText = Text("PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5);
+    Text playText = Text("PLAY", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight);
     playText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(playText);
 
-    Text optionsText = Text("OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight);
+    Text optionsText = Text("OPTIONS", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 2);
     optionsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(optionsText);
 
-    Text controlsText = Text("CONTROLS", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight);
+    Text controlsText = Text("CONTROLS", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 3);
     controlsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(controlsText);
 
-    Text exitText = Text("EXIT", WINDOW_WIDTH * 0.5, controlsText.y + controlsText.charHeight);
+    Text exitText = Text("EXIT", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 4);
     exitText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(exitText);
   }

@@ -9,7 +9,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "../shaders/shader.h"
+#include "shaders/shader.h"
 
 class Menu;
 
