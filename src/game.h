@@ -7,10 +7,9 @@
 #include "entities/ball.h"
 #include "game_state.h"
 #include "audio.h"
-#include "input.h"
-#include "menu/menu.h"
+#include "text/text.h"
 #include "text/display_text.h"
-#include "text/menu_text.h"
+#include "menu/main_menu.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -25,6 +24,9 @@ class Game
   bool playerGoal = false;
   bool enemyGoal = false;
 
+  bool is_wireframe_mode = false;
+  bool is_tab_pressed = false;
+
 public:
   Shader defaultShader;
   Shader textShader;
@@ -34,8 +36,7 @@ public:
   Ball ball;
 
   Texture padTexture;
-
-  Menu menu;
+  MainMenu mainMenu;
 
   Game(){};
   ~Game(){};
@@ -63,8 +64,6 @@ public:
   void init_entities()
   {
     player = Player("player", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.2, WINDOW_HEIGHT * 0.5), padTexture);
-    Input::init_input();
-    Input::audio = audio;
 
     enemy = Enemy("enemy", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), padTexture);
     Texture ballTexture = Texture("textures/ball1.png", GL_RGBA, GL_REPEAT);
@@ -86,8 +85,8 @@ public:
     ball = Ball("ball", defaultShader, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
     ball.set_audio(audio);
 
-    menu = Menu(defaultShader, textShader);
-    set_menu_texts();
+    mainMenu = MainMenu(defaultShader, textShader, audio);
+    mainMenu.set_menu_texts();
 
     textShader.set_uniform_matrix4_value("projection", 1, projection);
 
@@ -95,31 +94,13 @@ public:
     yDirection = 0;
   }
 
-  void set_menu_texts()
-  {
-    MenuText playText = MenuText("PLAY", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5);
-    playText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    menu.add_text(playText);
-
-    MenuText optionsText = MenuText("OPTIONS", WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5 + playText.charHeight);
-    optionsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    menu.add_text(optionsText);
-
-    MenuText controlsText = MenuText("CONTROLS", WINDOW_WIDTH * 0.5, optionsText.y + optionsText.charHeight);
-    controlsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    menu.add_text(controlsText);
-
-    MenuText exitText = MenuText("EXIT", WINDOW_WIDTH * 0.5, controlsText.y + controlsText.charHeight);
-    exitText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-    menu.add_text(exitText);
-  }
-
   void update_game_logic()
   {
     switch (GameState::state)
     {
     case MENU:
-      menu.render();
+      mainMenu.menu_controls();
+      mainMenu.render();
       break;
     case GAMEPLAY:
       if (GameState::is_state_changed())
@@ -127,9 +108,9 @@ public:
         inputPos.y = 0.0f;
         player.position.y = WINDOW_HEIGHT * 0.5;
       }
-      DisplayText(std::to_string(playerScore), 20.0f, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
-      DisplayText(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, 40.0f + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
-      Input::set_player(player);
+      DisplayText(std::to_string(playerScore), 20.0f, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      DisplayText(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      gameplay_controls();
       handle_gameplay_logic();
       break;
     case EXIT:
@@ -175,6 +156,68 @@ private:
       init_entities();
     }
   }
+
+  void gameplay_controls()
+  {
+    int tab_key = glfwGetKey(window, GLFW_KEY_TAB);
+    if (tab_key == GLFW_PRESS && !is_tab_pressed)
+    {
+      is_tab_pressed = true;
+      is_wireframe_mode = !is_wireframe_mode;
+      if (is_wireframe_mode)
+      {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      }
+      else
+      {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      }
+    }
+
+    if (tab_key == GLFW_RELEASE)
+    {
+      is_tab_pressed = false;
+    }
+
+    int w_key = glfwGetKey(window, GLFW_KEY_W);
+    int s_key = glfwGetKey(window, GLFW_KEY_S);
+    if (w_key == GLFW_PRESS)
+    {
+      if (player.position.y > 0)
+      {
+        inputPos.y = -1;
+      }
+      else
+      {
+        inputPos.y = -0;
+      }
+    }
+    if (s_key == GLFW_PRESS)
+    {
+      if (player.position.y < WINDOW_HEIGHT - player.scale.y / 2.5)
+      {
+        inputPos.y = 1;
+      }
+      else
+      {
+        inputPos.y = 0;
+      }
+    }
+    if (w_key == GLFW_RELEASE && s_key == GLFW_RELEASE)
+    {
+      inputPos.y = 0;
+    }
+
+    int escape_key = glfwGetKey(window, GLFW_KEY_ESCAPE);
+    if (escape_key == GLFW_PRESS)
+    {
+      setDeltaTime(0.0f);
+    }
+    if (escape_key == GLFW_RELEASE)
+    {
+      setDeltaTime(1.0f);
+    }
+  };
 
   void exit_game()
   {

@@ -1,14 +1,7 @@
 #include "common.h"
-#include "shaders/shader.h"
-#include "texture.h"
-#include "projection.h"
-#include "audio.h"
 #include "game.h"
 #include "game_state.h"
 #include "window.h"
-#include <bullet/btBulletDynamicsCommon.h>
-#include <fstream>
-#include <stb_image.h>
 
 Game game;
 
@@ -32,9 +25,7 @@ int main()
 
   while (!glfwWindowShouldClose(window))
   {
-    float currentFrame = glfwGetTime();
-    deltaTime = (currentFrame - lastFrame);
-    lastFrame = currentFrame;
+    setDeltaTime(1.0f);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -47,4 +38,4 @@ int main()
   game.destroy_window();
   glfwTerminate();
   return 0;
-}
+};

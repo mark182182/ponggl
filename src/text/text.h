@@ -11,6 +11,8 @@
 
 #include "../shaders/shader.h"
 
+class Menu;
+
 struct Character
 {
   unsigned int TextureID;
@@ -36,6 +38,8 @@ public:
   float lastY;
   float scale;
   glm::vec3 color;
+  bool isSelected = false;
+  Menu *menu;
 
   Text(){};
   Text(std::string _text, float _x, float _y)
@@ -72,6 +76,16 @@ public:
   {
     color = _color;
   }
+
+  void setIsSelected(bool _isSelected)
+  {
+    isSelected = _isSelected;
+  };
+
+  void setMenu(Menu &_menu)
+  {
+    menu = &_menu;
+  };
 
   Text set_vars_for_render(Shader &_s, float _scale, glm::vec3 _color)
   {
