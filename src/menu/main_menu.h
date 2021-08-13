@@ -7,38 +7,10 @@ class MainMenu : public Menu
 {
   using Menu::Menu;
 
-  bool is_w_pressed = false;
-  bool is_s_pressed = false;
-
 public:
   void menu_controls()
   {
-    int w_key = glfwGetKey(window, GLFW_KEY_W);
-    int s_key = glfwGetKey(window, GLFW_KEY_S);
-    if (w_key == GLFW_PRESS && !is_w_pressed)
-    {
-      is_w_pressed = true;
-      if (currentSelectorPos > 0)
-      {
-        currentSelectorPos--;
-      }
-    }
-    if (w_key == GLFW_RELEASE)
-    {
-      is_w_pressed = false;
-    }
-    if (s_key == GLFW_PRESS && !is_s_pressed)
-    {
-      is_s_pressed = true;
-      if (currentSelectorPos < selections.size() - 1)
-      {
-        currentSelectorPos++;
-      }
-    }
-    if (s_key == GLFW_RELEASE)
-    {
-      is_s_pressed = false;
-    }
+    move_selector_up_down();
     int e_key = glfwGetKey(window, GLFW_KEY_E);
     if (e_key == GLFW_PRESS && !is_e_pressed)
     {
@@ -72,20 +44,16 @@ public:
   };
   void set_menu_texts()
   {
-    Text playText = Text("PLAY", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight);
-    playText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    Text playText = Text("PLAY", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(playText);
 
-    Text optionsText = Text("OPTIONS", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 2);
-    optionsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    Text optionsText = Text("OPTIONS", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 2).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(optionsText);
 
-    Text controlsText = Text("CONTROLS", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 3);
-    controlsText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    Text controlsText = Text("CONTROLS", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 3).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(controlsText);
 
-    Text exitText = Text("EXIT", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 4);
-    exitText.set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+    Text exitText = Text("EXIT", WINDOW_WIDTH * 0.4, WINDOW_HEIGHT * 0.3 + Text::charHeight * 4).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f));
     add_text(exitText);
   }
 };

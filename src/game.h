@@ -10,6 +10,7 @@
 #include "text.h"
 #include "menu/main_menu.h"
 #include "menu/controls_menu.h"
+#include "menu/options_menu.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -26,6 +27,7 @@ class Game
 
   bool is_wireframe_mode = false;
   bool is_tab_pressed = false;
+  bool is_esc_pressed = false;
 
 public:
   Shader defaultShader;
@@ -37,6 +39,7 @@ public:
 
   Texture padTexture;
   MainMenu mainMenu;
+  OptionsMenu optionsMenu;
   ControlsMenu controlsMenu;
 
   Game(){};
@@ -54,6 +57,10 @@ public:
 
     mainMenu = MainMenu(defaultShader, textShader, audio);
     mainMenu.set_menu_texts();
+
+    optionsMenu = OptionsMenu(defaultShader, textShader, audio);
+    optionsMenu.set_parent_menu(&mainMenu);
+    optionsMenu.set_menu_texts();
 
     controlsMenu = ControlsMenu(defaultShader, textShader, audio);
     controlsMenu.set_parent_menu(&mainMenu);
@@ -107,7 +114,8 @@ public:
       switch (mainMenu.currentSelection)
       {
       case 1:
-        // TODO options menu here
+        optionsMenu.menu_controls();
+        optionsMenu.render();
         break;
       case 2:
         controlsMenu.menu_controls();
@@ -225,12 +233,14 @@ private:
     }
 
     int escape_key = glfwGetKey(window, GLFW_KEY_ESCAPE);
-    if (escape_key == GLFW_PRESS)
+    if (escape_key == GLFW_PRESS && !is_esc_pressed)
     {
+      is_esc_pressed = true;
       setDeltaTime(0.0f);
     }
     if (escape_key == GLFW_RELEASE)
     {
+      is_esc_pressed = false;
       setDeltaTime(1.0f);
     }
   };

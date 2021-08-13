@@ -22,6 +22,8 @@ public:
   int currentSelectorPos = 0;
   int currentSelection = -1;
 
+  bool is_w_pressed = false;
+  bool is_s_pressed = false;
   bool is_e_pressed = false;
 
   Menu(){};
@@ -29,7 +31,7 @@ public:
   {
     defaultShader = _defaultShader;
     textShader = _textShader;
-    Texture selectorTexture = Texture("textures/selector.png", GL_RGBA, GL_REPEAT);
+    Texture selectorTexture = Texture("textures/selector.png", GL_RGBA, GL_CLAMP_TO_EDGE);
     selector = Selector("selector", defaultShader, inputScale, inputPos, selectorTexture);
     audio = _audio;
   };
@@ -54,6 +56,36 @@ public:
   {
     inputPos = glm::vec2(text.x - 4.0f, text.y - 10.0f);
     inputScale = glm::vec2(text.width, text.charHeight * 2 + 30.0f);
+  }
+
+  void move_selector_up_down()
+  {
+    int w_key = glfwGetKey(window, GLFW_KEY_W);
+    int s_key = glfwGetKey(window, GLFW_KEY_S);
+    if (w_key == GLFW_PRESS && !is_w_pressed)
+    {
+      is_w_pressed = true;
+      if (currentSelectorPos > 0)
+      {
+        currentSelectorPos--;
+      }
+    }
+    if (w_key == GLFW_RELEASE)
+    {
+      is_w_pressed = false;
+    }
+    if (s_key == GLFW_PRESS && !is_s_pressed)
+    {
+      is_s_pressed = true;
+      if (currentSelectorPos < selections.size() - 1)
+      {
+        currentSelectorPos++;
+      }
+    }
+    if (s_key == GLFW_RELEASE)
+    {
+      is_s_pressed = false;
+    }
   }
 
   void render()

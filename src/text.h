@@ -52,40 +52,20 @@ public:
   };
   ~Text(){};
 
-  void setShader(Shader &_s)
+  void set_text(std::string _text)
   {
-    s = _s;
+    text = _text;
+    float xLength = x + _text.length() * (Characters['H'].Size.x * 2.5 + Characters['H'].Bearing.x);
+    if (xLength > WINDOW_WIDTH)
+    {
+      scale = 1 - (xLength - WINDOW_WIDTH) / xLength;
+    }
+    else
+    {
+      scale = 1;
+    }
+    width = 165.0f * _text.length() * scale;
   }
-
-  void setX(float _x)
-  {
-    x = _x;
-  }
-
-  void setY(float _y)
-  {
-    y = _y;
-  }
-
-  void setScale(float _scale)
-  {
-    scale = _scale;
-  }
-
-  void setColor(glm::vec3 _color)
-  {
-    color = _color;
-  }
-
-  void setIsSelected(bool _isSelected)
-  {
-    isSelected = _isSelected;
-  };
-
-  void setMenu(Menu &_menu)
-  {
-    menu = &_menu;
-  };
 
   Text set_vars_for_render(Shader &_s, float _scale, glm::vec3 _color)
   {
