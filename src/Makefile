@@ -1,4 +1,4 @@
-DEBUG := 0
+DEBUG := 1
 
 CXX := clang
 CXX_FLAGS := -pedantic-errors -v -Wall -Weffc++ -Wextra -Wsign-conversion -Werror -std=c++17
