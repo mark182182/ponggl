@@ -17,7 +17,7 @@ public:
     audio = _audio;
   };
 
-  void handle_logic(Player player, Enemy enemy, float &xDir, float &yDir)
+  void handle_logic(Player &player, Enemy &enemy, float &xDir, float &yDir)
   {
     if (std::round(position.y) > WINDOW_HEIGHT - scale.y / 4 && std::round(position.y) < WINDOW_HEIGHT)
     {

@@ -11,6 +11,7 @@
 #include "menu/main_menu.h"
 #include "menu/controls_menu.h"
 #include "menu/options_menu.h"
+#include "menu/pause_menu.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -41,6 +42,7 @@ public:
   MainMenu mainMenu;
   OptionsMenu optionsMenu;
   ControlsMenu controlsMenu;
+  PauseMenu pauseMenu;
 
   Game(){};
   ~Game(){};
@@ -65,6 +67,9 @@ public:
     controlsMenu = ControlsMenu(defaultShader, textShader, audio);
     controlsMenu.set_parent_menu(&mainMenu);
     controlsMenu.set_menu_texts();
+
+    pauseMenu = PauseMenu(defaultShader, textShader, audio);
+    pauseMenu.set_menu_texts();
   }
 
   void init_shader_vars()
@@ -127,14 +132,18 @@ public:
       }
       break;
     case GAMEPLAY:
+      gameplay_controls();
       if (GameState::is_state_changed())
       {
         inputPos.y = 0.0f;
         player.position.y = WINDOW_HEIGHT * 0.5;
+        ball.position.x = WINDOW_HEIGHT * 0.5;
+        ball.position.y = WINDOW_HEIGHT * 0.5;
+        playerScore = 0;
+        enemyScore = 0;
       }
       Text(std::to_string(playerScore), 20.0f, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       Text(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
-      gameplay_controls();
       handle_gameplay_logic();
       break;
     case EXIT:
@@ -236,12 +245,16 @@ private:
     if (escape_key == GLFW_PRESS && !is_esc_pressed)
     {
       is_esc_pressed = true;
-      setDeltaTime(0.0f);
+      is_paused = !is_paused;
     }
     if (escape_key == GLFW_RELEASE)
     {
       is_esc_pressed = false;
-      setDeltaTime(1.0f);
+    }
+    if (is_paused)
+    {
+      pauseMenu.menu_controls();
+      pauseMenu.render();
     }
   };
 

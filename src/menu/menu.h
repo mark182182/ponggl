@@ -54,8 +54,8 @@ public:
 
   void move_selector(Text &text)
   {
-    inputPos = glm::vec2(text.x - 4.0f, text.y - 10.0f);
-    inputScale = glm::vec2(text.width, text.charHeight * 2 + 30.0f);
+    selectorInputPos = glm::vec2(text.x - 4.0f, text.y - 10.0f);
+    selectorInputScale = glm::vec2(text.width, text.charHeight * 2 + 30.0f);
   }
 
   void move_selector_up_down()

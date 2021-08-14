@@ -25,7 +25,7 @@ int main()
 
   while (!glfwWindowShouldClose(window))
   {
-    setDeltaTime(1.0f);
+    calculate_delta_time();
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

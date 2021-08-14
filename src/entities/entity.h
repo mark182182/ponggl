@@ -3,7 +3,6 @@
 
 #include "../shaders/shader.h"
 #include "../texture.h"
-#include "../projection.h"
 #include "../audio.h"
 #include <iostream>
 #include <string>
