@@ -98,7 +98,7 @@ public:
     {
       selections[i].render_text();
     }
-    if (GameState::is_state_changed() || GameState::state == State::INIT)
+    if (GameState::state == State::INIT)
     {
       move_selector(selections[0]);
     }

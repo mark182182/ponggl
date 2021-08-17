@@ -30,7 +30,7 @@ public:
         audio.playSfx("audio/click.mp3");
         currentSelection = currentSelectorPos;
         is_paused = false;
-        GameState::set_state(MENU);
+        GameState::set_state(State::MENU);
       }
     }
     if (e_key == GLFW_RELEASE)

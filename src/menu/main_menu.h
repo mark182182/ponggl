@@ -20,7 +20,7 @@ public:
       case 0:
         audio.playSfx("audio/click.mp3");
         currentSelection = currentSelectorPos;
-        GameState::set_state(GAMEPLAY);
+        GameState::set_state(State::GAMEPLAY);
         break;
       case 1:
         currentSelection = currentSelectorPos;
@@ -31,10 +31,10 @@ public:
         audio.playSfx("audio/click.mp3");
         break;
       case 3:
-        GameState::set_state(EXIT);
+        GameState::set_state(State::EXIT);
         break;
       default:
-        GameState::set_state(EXIT);
+        GameState::set_state(State::EXIT);
       }
     }
     if (e_key == GLFW_RELEASE)

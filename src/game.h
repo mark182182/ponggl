@@ -132,16 +132,14 @@ public:
       }
       break;
     case GAMEPLAY:
-      gameplay_controls();
       if (GameState::is_state_changed())
       {
         inputPos.y = 0.0f;
-        player.position.y = WINDOW_HEIGHT * 0.5;
-        ball.position.x = WINDOW_HEIGHT * 0.5;
-        ball.position.y = WINDOW_HEIGHT * 0.5;
+        init_entities();
         playerScore = 0;
         enemyScore = 0;
       }
+      gameplay_controls();
       Text(std::to_string(playerScore), 20.0f, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       Text(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       handle_gameplay_logic();
