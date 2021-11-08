@@ -11,6 +11,7 @@ class Ball : public Entity
 public:
   Audio audio;
   float speed = 400.0f;
+  glm::vec3 ballColor = glm::vec3(1.0f, 0.0f, 0.0f);
 
   void set_audio(Audio &_audio)
   {
@@ -48,12 +49,13 @@ public:
 
     shader.set_uniform_matrix4_value("model", 1, model);
     shader.set_uniform_matrix4_value("projection", 1, projection);
-    shader.set_float_3("textColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader.set_float_3("lightColor", ballColor);
     texture.activiate_and_bind(GL_TEXTURE0);
     bind();
     update_position(position);
+    // lightPos = position;?
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
+    model = glm::translate(model, glm::vec3(position));
     model = glm::scale(model, glm::vec3(scale.x, scale.y, 0.0f));
     draw();
     unbind();

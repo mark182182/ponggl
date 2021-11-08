@@ -27,11 +27,16 @@ class Game
   bool enemyGoal = false;
 
   bool is_wireframe_mode = false;
+  bool is_debug_stats_mode = false;
+
   bool is_tab_pressed = false;
+  bool is_f10_pressed = false;
   bool is_esc_pressed = false;
 
 public:
-  Shader defaultShader;
+  Shader entityShader;
+  Shader menuShader;
+  Shader lightShader;
   Shader textShader;
 
   Player player;
@@ -49,7 +54,9 @@ public:
 
   void init_shaders()
   {
-    defaultShader = Shader("shaders/vertex.vs", "shaders/fragment.fs");
+    entityShader = Shader("shaders/entity_vertex.vs", "shaders/entity_fragment.fs");
+    menuShader = Shader("shaders/menu_vertex.vs", "shaders/menu_fragment.fs");
+    lightShader = Shader("shaders/light_vertex.vs", "shaders/light_fragment.fs");
     textShader = Shader("shaders/text_vertex.vs", "shaders/text_fragment.fs");
     initText();
 
@@ -57,24 +64,24 @@ public:
 
     projection = glm::ortho(0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, -1.0f, 1.0f);
 
-    mainMenu = MainMenu(defaultShader, textShader, audio);
+    mainMenu = MainMenu(menuShader, textShader, audio);
     mainMenu.set_menu_texts();
 
-    optionsMenu = OptionsMenu(defaultShader, textShader, audio);
+    optionsMenu = OptionsMenu(menuShader, textShader, audio);
     optionsMenu.set_parent_menu(&mainMenu);
     optionsMenu.set_menu_texts();
 
-    controlsMenu = ControlsMenu(defaultShader, textShader, audio);
+    controlsMenu = ControlsMenu(menuShader, textShader, audio);
     controlsMenu.set_parent_menu(&mainMenu);
     controlsMenu.set_menu_texts();
 
-    pauseMenu = PauseMenu(defaultShader, textShader, audio);
+    pauseMenu = PauseMenu(menuShader, textShader, audio);
     pauseMenu.set_menu_texts();
   }
 
   void init_shader_vars()
   {
-    defaultShader.use().set_int("image", 0);
+    menuShader.use().set_int("image", 0);
     player.shader.use().set_int("image", 0);
     enemy.shader.use().set_int("image", 0);
     ball.shader.use().set_int("image", 0);
@@ -83,9 +90,9 @@ public:
 
   void init_entities()
   {
-    player = Player("player", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.2, WINDOW_HEIGHT * 0.5), padTexture);
+    player = Player("player", entityShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.2, WINDOW_HEIGHT * 0.5), padTexture);
 
-    enemy = Enemy("enemy", defaultShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), padTexture);
+    enemy = Enemy("enemy", entityShader, glm::vec2(WINDOW_WIDTH / 10, WINDOW_HEIGHT / 1.5), glm::vec2(WINDOW_WIDTH * 0.8, WINDOW_HEIGHT * 0.5), padTexture);
     Texture ballTexture = Texture("textures/ball1.png", GL_RGBA, GL_REPEAT);
 
     switch (GameState::difficulity)
@@ -102,7 +109,7 @@ public:
     default:
       enemy.speed = 1.5f;
     }
-    ball = Ball("ball", defaultShader, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
+    ball = Ball("ball", lightShader, glm::vec2(WINDOW_WIDTH / 8, WINDOW_WIDTH / 16), glm::vec2(WINDOW_WIDTH * 0.5, WINDOW_HEIGHT * 0.5), ballTexture);
     ball.set_audio(audio);
 
     textShader.set_uniform_matrix4_value("projection", 1, projection);
@@ -142,6 +149,10 @@ public:
       gameplay_controls();
       Text(std::to_string(playerScore), 20.0f, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
       Text(std::to_string(enemyScore), WINDOW_WIDTH * 0.95, Text::charHeight).set_vars_for_render(textShader, 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      if (is_debug_stats_mode)
+      {
+        Text(std::to_string(get_frametime()) + " ms | FPS: " + std::to_string(frametimeFrames), 20.0f, 20.0f).set_vars_for_render(textShader, 0.5f, glm::vec3(1.0f, 1.0f, 1.0f)).render_text();
+      }
       handle_gameplay_logic();
       break;
     case EXIT:
@@ -165,11 +176,16 @@ public:
 private:
   void handle_gameplay_logic()
   {
-    defaultShader.use();
-
-    player.handle_logic();
-    enemy.handle_logic(ball);
+    lightShader.use();
     ball.handle_logic(player, enemy, xDirection, yDirection);
+
+    entityShader.use();
+    enemy.lightPos = ball.position;
+    enemy.lightColor = ball.ballColor;
+    enemy.handle_logic(ball);
+    player.lightPos = ball.position;
+    player.lightColor = ball.ballColor;
+    player.handle_logic();
 
     if (ball.position.x <= WINDOW_WIDTH && ball.position.x >= WINDOW_WIDTH * 0.8 + enemy.scale.x / 4)
     {
@@ -208,6 +224,18 @@ private:
     if (tab_key == GLFW_RELEASE)
     {
       is_tab_pressed = false;
+    }
+
+    int f10_key = glfwGetKey(window, GLFW_KEY_F10);
+    if (f10_key == GLFW_PRESS && !is_f10_pressed)
+    {
+      is_f10_pressed = true;
+      is_debug_stats_mode = !is_debug_stats_mode;
+    }
+
+    if (f10_key == GLFW_RELEASE)
+    {
+      is_f10_pressed = false;
     }
 
     int w_key = glfwGetKey(window, GLFW_KEY_W);

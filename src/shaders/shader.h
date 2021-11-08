@@ -41,6 +41,10 @@ public:
   {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
   };
+    void set_float_2(const std::string &name, glm::vec2 vec2)
+  {
+    glUniform2f(glGetUniformLocation(ID, name.c_str()), vec2.x, vec2.y);
+  }
   void set_float_3(const std::string &name, glm::vec3 vec3)
   {
     glUniform3f(glGetUniformLocation(ID, name.c_str()), vec3.x, vec3.y, vec3.z);
@@ -74,7 +78,7 @@ private:
     const GLint shaderLength = shaderStr.size();
     glShaderSource(shader, 1, &shaderSource, &shaderLength);
     glCompileShader(shader);
-    // check_shader_compile_status(shader, type);
+    check_shader_compile_status(shader, type);
     return shader;
   };
 

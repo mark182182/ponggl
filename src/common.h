@@ -22,9 +22,28 @@ glm::vec2 selectorInputScale = glm::vec2(1.0f, 1.0f);
 
 void calculate_delta_time()
 {
-  float currentFrame = glfwGetTime();
+  double currentFrame = glfwGetTime();
   deltaTime = !is_paused ? (currentFrame - lastFrame) : 0;
   lastFrame = currentFrame;
-}
+};
+
+double lastTime = glfwGetTime();
+double frameTime = 0.0f;
+int frametimeFrames = 0;
+int frameCounter = 0;
+
+float get_frametime()
+{
+  double currentTime = glfwGetTime();
+  frameCounter++;
+  if (currentTime - lastTime >= 1.0)
+  {
+    frameTime = 1000.0f / double(frameCounter);
+    frametimeFrames = frameCounter;
+    frameCounter = 0;
+    lastTime += 1.0f;
+  }
+  return frameTime;
+};
 
 #endif

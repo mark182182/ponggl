@@ -14,12 +14,13 @@
 class Entity
 {
   unsigned int vbo, vao, ebo;
-  float vertices[6][4] = {{0.0f, 0.4f, 0.0f, 1.0f},
-                          {0.2f, 0.0f, 1.0f, 0.0f},
-                          {0.0f, 0.0f, 0.0f, 0.0f},
-                          {0.0f, 0.4f, 0.0f, 1.0f},
-                          {0.2f, 0.4f, 1.0f, 1.0f},
-                          {0.2f, 0.0f, 1.0f, 0.0f}};
+  // x y normalx normaly texturecoord texturecoord
+  float vertices[6][6] = {{0.0f, 0.4f, 0.0f, 1.0f, 0.0f, 1.0f},
+                          {0.2f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+                          {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+                          {0.0f, 0.4f, 0.0f, 1.0f, 0.0f, 1.0f},
+                          {0.2f, 0.4f, 1.0f, 1.0f, 1.0f, 1.0f},
+                          {0.2f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f}};
 
 public:
   std::string name;
@@ -27,6 +28,8 @@ public:
   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 0.0f);
   glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 normPos = glm::normalize(position);
+  glm::vec3 lightPos = glm::vec3(1.0f, 1.0f, 0.0f);
+  glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
   Texture texture;
   float speed = 0.01f;
   Shader shader;
@@ -71,7 +74,7 @@ public:
     normPos = glm::normalize(position);
   }
 
-    void update_position(glm::vec3 &pos)
+  void update_position(glm::vec3 &pos)
   {
     position = glm::vec3(pos);
     normPos = glm::normalize(position);
@@ -86,11 +89,15 @@ public:
   {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
-    glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    glBindVertexArray(vao);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(2*sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(4*sizeof(float)));
+    glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
   }

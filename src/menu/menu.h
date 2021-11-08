@@ -11,7 +11,7 @@ class Menu
 {
 
 public:
-  Shader defaultShader;
+  Shader selectorShader;
   Shader textShader;
   Selector selector;
 
@@ -29,10 +29,10 @@ public:
   Menu(){};
   Menu(Shader &_defaultShader, Shader &_textShader, Audio &_audio)
   {
-    defaultShader = _defaultShader;
+    selectorShader = _defaultShader;
     textShader = _textShader;
     Texture selectorTexture = Texture("textures/selector.png", GL_RGBA, GL_CLAMP_TO_EDGE);
-    selector = Selector("selector", defaultShader, inputScale, inputPos, selectorTexture);
+    selector = Selector("selector", selectorShader, inputScale, inputPos, selectorTexture);
     audio = _audio;
   };
 
